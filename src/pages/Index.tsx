@@ -36,20 +36,20 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <Home className="h-8 w-8" />
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Home className="h-6 w-6 sm:h-8 sm:w-8" />
             <div>
-              <h1 className="text-3xl font-bold">Cyprus Rental Finder</h1>
-              <p className="text-primary-foreground/80">Find your perfect rental property in Cyprus</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Cyprus Rental Finder</h1>
+              <p className="text-sm sm:text-base text-primary-foreground/80">Find your perfect rental property in Cyprus</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8">
         {/* Search and Filters */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <PropertyFilters
             filters={filters}
             onFiltersChange={handleFiltersChange}
@@ -86,7 +86,7 @@ const Index = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {properties.map((property) => (
               <PropertyCard
                 key={property.id}
