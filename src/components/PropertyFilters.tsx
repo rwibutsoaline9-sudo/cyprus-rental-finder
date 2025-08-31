@@ -35,7 +35,7 @@ export const PropertyFilters = ({ filters, onFiltersChange, onSearch }: Property
   const handleFilterChange = (key: keyof PropertyFiltersType, value: any) => {
     onFiltersChange({
       ...filters,
-      [key]: value === '' ? undefined : value
+      [key]: value === '' || value === 'all' ? undefined : value
     });
   };
 
@@ -95,7 +95,7 @@ export const PropertyFilters = ({ filters, onFiltersChange, onSearch }: Property
                 <SelectValue placeholder="All cities" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All cities</SelectItem>
+                <SelectItem value="all">All cities</SelectItem>
                 {cyprioticCities.map((city) => (
                   <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
@@ -113,7 +113,7 @@ export const PropertyFilters = ({ filters, onFiltersChange, onSearch }: Property
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
                 <SelectItem value="short-term">Short-term</SelectItem>
                 <SelectItem value="long-term">Long-term</SelectItem>
               </SelectContent>
@@ -130,7 +130,7 @@ export const PropertyFilters = ({ filters, onFiltersChange, onSearch }: Property
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
                 {propertyTypes.map((type) => (
                   <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                 ))}
