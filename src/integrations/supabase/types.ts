@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_amount: number
+          booking_date: string
+          check_in_date: string
+          check_out_date: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          payment_status: string
+          property_id: string
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_amount: number
+          booking_date?: string
+          check_in_date: string
+          check_out_date?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          property_id: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_amount?: number
+          booking_date?: string
+          check_in_date?: string
+          check_out_date?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          property_id?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      properties: {
+        Row: {
+          amenities: string[] | null
+          area: string
+          available: boolean
+          bathrooms: number
+          bedrooms: number
+          city: string
+          created_at: string
+          description: string | null
+          furnished: boolean
+          id: string
+          images: string[] | null
+          price: number
+          property_type: string
+          rental_period: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          area: string
+          available?: boolean
+          bathrooms: number
+          bedrooms: number
+          city: string
+          created_at?: string
+          description?: string | null
+          furnished?: boolean
+          id?: string
+          images?: string[] | null
+          price: number
+          property_type: string
+          rental_period: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          area?: string
+          available?: boolean
+          bathrooms?: number
+          bedrooms?: number
+          city?: string
+          created_at?: string
+          description?: string | null
+          furnished?: boolean
+          id?: string
+          images?: string[] | null
+          price?: number
+          property_type?: string
+          rental_period?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
