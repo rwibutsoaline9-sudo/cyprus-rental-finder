@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Property } from '@/types/property';
 import { MapPin, Bed, Bath, Wifi, Car, Home, ImageIcon } from 'lucide-react';
+import { trackPropertyView } from '@/hooks/useVisitorTracking';
 
 // Import property images
 import apartment1 from '@/assets/apartment-1.jpg';
@@ -165,7 +166,10 @@ export const PropertyCard = ({ property, onBookNow }: PropertyCardProps) => {
       
       <CardFooter className="pt-4">
         <Button 
-          onClick={() => onBookNow(property)}
+          onClick={() => {
+            trackPropertyView(property.id);
+            onBookNow(property);
+          }}
           className="w-full bg-primary hover:bg-primary/90"
           size="lg"
         >

@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          password_hash: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          password_hash: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          password_hash?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_amount: number
@@ -127,6 +157,115 @@ export type Database = {
           rental_period?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      property_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          property_id: string
+          rating: number
+          reviewer_email: string | null
+          reviewer_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          property_id: string
+          rating: number
+          reviewer_email?: string | null
+          reviewer_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          property_id?: string
+          rating?: number
+          reviewer_email?: string | null
+          reviewer_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_ratings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_views: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          property_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          property_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          property_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_views_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_analytics: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_address: unknown | null
+          page_url: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: unknown | null
+          page_url: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: unknown | null
+          page_url?: string
+          referrer?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }

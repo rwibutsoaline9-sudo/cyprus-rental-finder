@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Property, PropertyFilters as PropertyFiltersType } from '@/types/property';
 import { useProperties } from '@/hooks/useProperties';
+import { useVisitorTracking } from '@/hooks/useVisitorTracking';
 import { PropertyCard } from '@/components/PropertyCard';
 import { PropertyFilters } from '@/components/PropertyFilters';
 import { BookingModal } from '@/components/BookingModal';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Home, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Home, MapPin, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
+  useVisitorTracking();
   const [filters, setFilters] = useState<PropertyFiltersType>({});
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -37,12 +41,24 @@ const Index = () => {
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Home className="h-6 w-6 sm:h-8 sm:w-8" />
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Cyprus Rental Finder</h1>
-              <p className="text-sm sm:text-base text-primary-foreground/80">Find your perfect rental property in Cyprus</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Home className="h-6 w-6 sm:h-8 sm:w-8" />
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Cyprus Rental Finder</h1>
+                <p className="text-sm sm:text-base text-primary-foreground/80">Find your perfect rental property in Cyprus</p>
+              </div>
             </div>
+            <nav className="hidden md:flex items-center space-x-4">
+              <Link 
+                to="/admin" 
+                className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                Admin
+              </Link>
+              <Button variant="secondary" size="sm">Sign In</Button>
+            </nav>
           </div>
         </div>
       </header>
