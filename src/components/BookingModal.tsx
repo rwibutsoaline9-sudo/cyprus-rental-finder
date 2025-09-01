@@ -1,14 +1,19 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Property } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, CreditCard, MapPin, Home } from 'lucide-react';
+import { CalendarDays, CreditCard, MapPin, Home, Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface BookingModalProps {
   property: Property | null;
@@ -20,15 +25,17 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [checkInDate, setCheckInDate] = useState('');
-  const [checkOutDate, setCheckOutDate] = useState('');
+  const [checkInDate, setCheckInDate] = useState<Date>();
+  const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [notes, setNotes] = useState('');
+  const [paymentPercentage, setPaymentPercentage] = useState('50');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   if (!property) return null;
 
-  const bookingAmount = property.price * 0.5; // 50% booking fee
+  const paymentAmount = property.price * (parseFloat(paymentPercentage) / 100);
+  const remainingAmount = property.price - paymentAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,9 +59,9 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
           customer_name: customerName,
           customer_email: customerEmail,
           customer_phone: customerPhone,
-          booking_amount: bookingAmount,
-          check_in_date: checkInDate,
-          check_out_date: checkOutDate || null,
+          booking_amount: paymentAmount,
+          check_in_date: checkInDate.toISOString().split('T')[0],
+          check_out_date: checkOutDate ? checkOutDate.toISOString().split('T')[0] : null,
           notes: notes || null,
           payment_status: 'pending'
         })
@@ -77,9 +84,10 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
         setCustomerName('');
         setCustomerEmail('');
         setCustomerPhone('');
-        setCheckInDate('');
-        setCheckOutDate('');
+        setCheckInDate(undefined);
+        setCheckOutDate(undefined);
         setNotes('');
+        setPaymentPercentage('50');
         onClose();
       }, 1000);
 
@@ -104,141 +112,252 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-2 text-xl">
             <Home className="h-5 w-5" />
-            Book Property
+            Complete your reservation
           </DialogTitle>
-          <DialogDescription>
-            Complete your booking by paying 50% upfront. The remaining 50% is due after moving in.
-          </DialogDescription>
         </DialogHeader>
 
-        {/* Property Summary */}
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">{property.title}</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <MapPin className="h-4 w-4" />
-              {property.area}, {property.city}
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-sm text-muted-foreground">Total Price: </span>
-                <span className="font-medium">{formatPrice(property.price, property.rental_period)}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left side - Form */}
+          <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Guest Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Your information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customer_name">Full Name *</Label>
+                    <Input
+                      id="customer_name"
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="customer_email">Email Address *</Label>
+                    <Input
+                      id="customer_email"
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customer_phone">Phone Number *</Label>
+                  <Input
+                    id="customer_phone"
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-muted-foreground">Booking Fee (50%)</div>
-                <div className="text-xl font-bold text-primary">€{bookingAmount.toFixed(2)}</div>
+
+              {/* Dates */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Your trip</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Check-in Date *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !checkInDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {checkInDate ? format(checkInDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={checkInDate}
+                          onSelect={setCheckInDate}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {property.rental_period === 'short-term' && (
+                    <div className="space-y-2">
+                      <Label>Check-out Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !checkOutDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {checkOutDate ? format(checkOutDate, "PPP") : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={checkOutDate}
+                            onSelect={setCheckOutDate}
+                            disabled={(date) => date < (checkInDate || new Date())}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customer_name">Full Name *</Label>
-              <Input
-                id="customer_name"
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
+              {/* Payment Options */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Payment options</h3>
+                <RadioGroup value={paymentPercentage} onValueChange={setPaymentPercentage} className="space-y-3">
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                    <RadioGroupItem value="50" id="payment-50" />
+                    <Label htmlFor="payment-50" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Pay 50% now</div>
+                      <div className="text-sm text-muted-foreground">
+                        Pay €{(property.price * 0.5).toFixed(0)} now, €{(property.price * 0.5).toFixed(0)} after check-in
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                    <RadioGroupItem value="75" id="payment-75" />
+                    <Label htmlFor="payment-75" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Pay 75% now</div>
+                      <div className="text-sm text-muted-foreground">
+                        Pay €{(property.price * 0.75).toFixed(0)} now, €{(property.price * 0.25).toFixed(0)} after check-in
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                    <RadioGroupItem value="100" id="payment-100" />
+                    <Label htmlFor="payment-100" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Pay 100% now</div>
+                      <div className="text-sm text-muted-foreground">
+                        Pay full amount €{property.price.toFixed(0)} now
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="customer_email">Email Address *</Label>
-              <Input
-                id="customer_email"
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="customer_phone">Phone Number *</Label>
-            <Input
-              id="customer_phone"
-              type="tel"
-              value={customerPhone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="check_in_date" className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />
-                Check-in Date *
-              </Label>
-              <Input
-                id="check_in_date"
-                type="date"
-                value={checkInDate}
-                onChange={(e) => setCheckInDate(e.target.value)}
-                required
-              />
-            </div>
-
-            {property.rental_period === 'short-term' && (
+              {/* Additional Notes */}
               <div className="space-y-2">
-                <Label htmlFor="check_out_date" className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  Check-out Date
-                </Label>
-                <Input
-                  id="check_out_date"
-                  type="date"
-                  value={checkOutDate}
-                  onChange={(e) => setCheckOutDate(e.target.value)}
+                <Label htmlFor="notes">Message to host (optional)</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Tell your host about your trip, who's coming with you, or ask any questions..."
+                  rows={3}
                 />
               </div>
-            )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {isSubmitting ? 'Processing...' : `Reserve & Pay €${paymentAmount.toFixed(0)}`}
+                </Button>
+              </div>
+            </form>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Additional Notes</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special requests or additional information..."
-              rows={3}
-            />
-          </div>
+          {/* Right side - Property Summary */}
+          <div className="lg:sticky lg:top-6">
+            <Card className="border shadow-sm">
+              <CardContent className="p-6 space-y-4">
+                {/* Property Image & Basic Info */}
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                    <img 
+                      src={property.images?.[0] || ''} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium line-clamp-2">{property.title}</h4>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                      <MapPin className="h-3 w-3" />
+                      {property.area}, {property.city}
+                    </div>
+                  </div>
+                </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary hover:bg-primary/90"
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Processing...' : `Pay €${bookingAmount.toFixed(2)} Now`}
-            </Button>
-          </div>
-        </form>
+                {/* Price Breakdown */}
+                <div className="space-y-3 pt-4 border-t">
+                  <h4 className="font-medium">Price details</h4>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total price</span>
+                      <span>{formatPrice(property.price, property.rental_period)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Pay now ({paymentPercentage}%)</span>
+                      <span className="font-medium">€{paymentAmount.toFixed(0)}</span>
+                    </div>
+                    {parseFloat(paymentPercentage) < 100 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Pay after check-in</span>
+                        <span>€{remainingAmount.toFixed(0)}</span>
+                      </div>
+                    )}
+                  </div>
 
-        <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-          By proceeding, you agree to pay the booking fee of 50%. The remaining 50% will be due after moving into the property.
+                  <div className="flex justify-between font-semibold pt-2 border-t">
+                    <span>Total due now</span>
+                    <span>€{paymentAmount.toFixed(0)}</span>
+                  </div>
+                </div>
+
+                {/* Booking Protection */}
+                <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
+                  <div className="font-medium">Your booking is protected</div>
+                  <div className="text-muted-foreground text-xs">
+                    Free cancellation for 48 hours. Get a full refund if you cancel before then.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

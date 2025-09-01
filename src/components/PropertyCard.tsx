@@ -1,8 +1,10 @@
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Property } from '@/types/property';
-import { MapPin, Bed, Bath, Wifi, Car, Home, ImageIcon } from 'lucide-react';
+import { MapPin, Bed, Bath, Wifi, Car, Home, ImageIcon, Heart, Star } from 'lucide-react';
 import { trackPropertyView } from '@/hooks/useVisitorTracking';
 
 // Import property images
@@ -19,162 +21,184 @@ interface PropertyCardProps {
 }
 
 export const PropertyCard = ({ property, onBookNow }: PropertyCardProps) => {
+  const [isFavorited, setIsFavorited] = useState(false);
+
   const formatPrice = (price: number, period: string) => {
     if (period === 'short-term') {
-      return `€${price}/night`;
+      return `€${price}`;
     }
-    return `€${price}/month`;
+    return `€${price}`;
   };
 
-  const getPropertyIcon = (type: string) => {
-    switch (type) {
-      case 'apartment':
-        return <Home className="h-4 w-4" />;
-      case 'house':
-        return <Home className="h-4 w-4" />;
-      case 'studio':
-        return <Home className="h-4 w-4" />;
-      case 'villa':
-        return <Home className="h-4 w-4" />;
-      default:
-        return <Home className="h-4 w-4" />;
-    }
+  const getPeriodLabel = (period: string) => {
+    return period === 'short-term' ? 'night' : 'month';
   };
 
-  const getAmenityIcon = (amenity: string) => {
-    const amenityLower = amenity.toLowerCase();
-    if (amenityLower.includes('wifi')) return <Wifi className="h-3 w-3" />;
-    if (amenityLower.includes('parking')) return <Car className="h-3 w-3" />;
-    return null;
-  };
-
-  const getPropertyImage = (property: Property) => {
-    // If property has images array with actual image URLs, use the first one
+  const getPropertyImages = (property: Property) => {
+    // If property has uploaded images, use them
     if (property.images && property.images.length > 0 && property.images[0] !== '') {
-      return property.images[0];
+      return property.images;
     }
     
-    // Fallback to imported local images based on property type
+    // Fallback to local images based on property type
     switch (property.property_type) {
       case 'apartment':
-        return Math.random() > 0.5 ? apartment1 : apartment2;
+        return [apartment1, apartment2];
       case 'studio':
-        return studio1;
+        return [studio1];
       case 'house':
-        return Math.random() > 0.5 ? house1 : house2;
+        return [house1, house2];
       case 'villa':
-        return villa1;
+        return [villa1];
       default:
-        return apartment1;
+        return [apartment1];
     }
   };
 
+  const images = getPropertyImages(property);
+
   return (
-    <Card className="w-full hover:shadow-lg transition-shadow overflow-hidden">
-      {/* Property Image */}
-      <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-        <img 
-          src={getPropertyImage(property)} 
-          alt={property.title}
-          className="w-full h-full object-cover transition-transform hover:scale-105"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const fallback = target.nextElementSibling as HTMLElement;
-            if (fallback) fallback.style.display = 'flex';
+    <Card className="group w-full bg-card border-0 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden rounded-xl">
+      {/* Image Carousel */}
+      <div className="relative">
+        <Carousel className="w-full">
+          <CarouselContent>
+            {images.map((image, index) => (
+              <CarouselItem key={index}>
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+                  <img 
+                    src={image} 
+                    alt={`${property.title} - Image ${index + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  {/* Fallback icon when image fails to load */}
+                  <div className="absolute inset-0 bg-muted hidden items-center justify-center">
+                    <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {images.length > 1 && (
+            <>
+              <CarouselPrevious className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/80 hover:bg-white border-0 shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
+              <CarouselNext className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/80 hover:bg-white border-0 shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            </>
+          )}
+          
+          {/* Image counter dots */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, index) => (
+                <div key={index} className="w-1.5 h-1.5 rounded-full bg-white/60" />
+              ))}
+            </div>
+          )}
+        </Carousel>
+
+        {/* Favorite button */}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute top-3 right-3 h-8 w-8 bg-white/80 hover:bg-white border-0 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFavorited(!isFavorited);
           }}
-        />
-        {/* Fallback icon when image fails to load */}
-        <div className="absolute inset-0 bg-muted hidden items-center justify-center">
-          <ImageIcon className="h-12 w-12 text-muted-foreground" />
-        </div>
-        {/* Price overlay */}
-        <div className="absolute top-3 right-3 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full">
-          <span className="font-bold text-sm sm:text-base">
-            {formatPrice(property.price, property.rental_period)}
-          </span>
-        </div>
+        >
+          <Heart className={`h-4 w-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+        </Button>
+
         {/* Property type badge */}
-        <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="capitalize text-xs sm:text-sm">
-            {property.property_type}
-          </Badge>
-        </div>
+        <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0 hover:bg-black/60">
+          {property.property_type.charAt(0).toUpperCase() + property.property_type.slice(1)}
+        </Badge>
       </div>
       
-      <CardHeader className="pb-3">
+      <CardContent className="p-4 space-y-3">
+        {/* Location and rating */}
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-1 sm:gap-2">
-            {getPropertyIcon(property.property_type)}
-            <Badge 
-              variant={property.rental_period === 'short-term' ? 'default' : 'outline'}
-              className="capitalize text-xs"
-            >
-              {property.rental_period}
-            </Badge>
-            {property.furnished && (
-              <Badge variant="outline" className="text-xs">
-                Furnished
-              </Badge>
-            )}
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <MapPin className="h-3 w-3" />
+            <span className="font-medium text-foreground">{property.area}, {property.city}</span>
+          </div>
+          <div className="flex items-center gap-1 text-sm">
+            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium">4.8</span>
           </div>
         </div>
-        <h3 className="text-base sm:text-lg font-semibold line-clamp-2">{property.title}</h3>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <MapPin className="h-4 w-4" />
-          <span className="text-sm">{property.area}, {property.city}</span>
-        </div>
-        
-        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+
+        {/* Title */}
+        <h3 className="font-medium text-base line-clamp-1 text-foreground group-hover:text-primary transition-colors">
+          {property.title}
+        </h3>
+
+        {/* Property details */}
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           {property.bedrooms > 0 && (
             <div className="flex items-center gap-1">
-              <Bed className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-              <span className="text-xs sm:text-sm">{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>
+              <Bed className="h-3 w-3" />
+              <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>
             </div>
           )}
           <div className="flex items-center gap-1">
-            <Bath className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-            <span className="text-xs sm:text-sm">{property.bathrooms} bath{property.bathrooms > 1 ? 's' : ''}</span>
+            <Bath className="h-3 w-3" />
+            <span>{property.bathrooms} bath{property.bathrooms > 1 ? 's' : ''}</span>
           </div>
+          {property.furnished && (
+            <Badge variant="outline" className="text-xs py-0">
+              Furnished
+            </Badge>
+          )}
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {property.description}
-        </p>
-
+        {/* Amenities preview */}
         {property.amenities && property.amenities.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {property.amenities.slice(0, 3).map((amenity, index) => (
-              <div key={index} className="flex items-center gap-1">
-                {getAmenityIcon(amenity)}
-                <Badge variant="outline" className="text-xs">
-                  {amenity}
-                </Badge>
-              </div>
+              <span key={index} className="flex items-center gap-1">
+                {amenity.toLowerCase().includes('wifi') && <Wifi className="h-3 w-3" />}
+                {amenity.toLowerCase().includes('parking') && <Car className="h-3 w-3" />}
+                {amenity}
+              </span>
             ))}
             {property.amenities.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{property.amenities.length - 3} more
-              </Badge>
+              <span>+{property.amenities.length - 3} more</span>
             )}
           </div>
         )}
+
+        {/* Price */}
+        <div className="flex items-baseline justify-between pt-2">
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-semibold text-foreground">
+              {formatPrice(property.price, property.rental_period)}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              / {getPeriodLabel(property.rental_period)}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {property.rental_period === 'short-term' ? 'Short-term' : 'Long-term'}
+          </span>
+        </div>
       </CardContent>
       
-      <CardFooter className="pt-4">
+      <CardFooter className="p-4 pt-0">
         <Button 
           onClick={() => {
             trackPropertyView(property.id);
             onBookNow(property);
           }}
-          className="w-full bg-primary hover:bg-primary/90"
-          size="lg"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-11 transition-all duration-200 hover:shadow-md"
         >
-          <span className="hidden sm:inline">Book Now - Pay 50% (€{(property.price * 0.5).toFixed(0)})</span>
-          <span className="sm:hidden">Book - €{(property.price * 0.5).toFixed(0)}</span>
+          Reserve
         </Button>
       </CardFooter>
     </Card>
