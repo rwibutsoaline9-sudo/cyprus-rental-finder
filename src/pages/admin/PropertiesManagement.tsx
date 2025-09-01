@@ -94,6 +94,10 @@ export const PropertiesManagement = () => {
                   src={property.images[0]}
                   alt={property.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center">

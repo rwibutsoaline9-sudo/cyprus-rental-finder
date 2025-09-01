@@ -11,6 +11,10 @@ export const usePropertiesAdmin = () => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
+      
+      // Small delay to prevent flash
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -28,6 +32,7 @@ export const usePropertiesAdmin = () => {
         description: "Failed to load properties. Please try again.",
         variant: "destructive",
       });
+      setProperties([]);
     } finally {
       setLoading(false);
     }
