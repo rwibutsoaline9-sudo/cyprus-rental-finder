@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useProperties } from '@/hooks/useProperties';
+import { usePropertiesAdmin } from '@/hooks/usePropertiesAdmin';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { PropertyFormDialog } from '@/components/admin/PropertyFormDialog';
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export const PropertiesManagement = () => {
-  const { properties, loading, refetch } = useProperties();
+  const { properties, loading, refetch } = usePropertiesAdmin();
   const { deleteProperty, loading: actionLoading } = usePropertyManagement();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
