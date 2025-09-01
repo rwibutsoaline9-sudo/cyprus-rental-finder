@@ -10,13 +10,22 @@ export const usePropertyManagement = () => {
   const createProperty = async (propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setLoading(true);
+      console.log('Creating property with data:', propertyData);
+      
       const { data, error } = await supabase
         .from('properties')
         .insert([propertyData])
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned after creating property');
+      }
 
       toast({
         title: "Success",
@@ -28,7 +37,7 @@ export const usePropertyManagement = () => {
       console.error('Error creating property:', error);
       toast({
         title: "Error",
-        description: "Failed to create property",
+        description: error instanceof Error ? error.message : "Failed to create property",
         variant: "destructive",
       });
       throw error;
@@ -40,14 +49,23 @@ export const usePropertyManagement = () => {
   const updateProperty = async (id: string, updates: Partial<Property>) => {
     try {
       setLoading(true);
+      console.log('Updating property:', id, 'with data:', updates);
+      
       const { data, error } = await supabase
         .from('properties')
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned after updating property');
+      }
 
       toast({
         title: "Success",
@@ -59,7 +77,7 @@ export const usePropertyManagement = () => {
       console.error('Error updating property:', error);
       toast({
         title: "Error",
-        description: "Failed to update property",
+        description: error instanceof Error ? error.message : "Failed to update property",
         variant: "destructive",
       });
       throw error;
@@ -96,35 +114,50 @@ export const usePropertyManagement = () => {
   };
 
   const uploadImages = async (files: FileList): Promise<string[]> => {
-    const uploadPromises = Array.from(files).map(async (file) => {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff'];
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error(`Unsupported file type: ${file.type}`);
-      }
+    try {
+      console.log('Starting image upload for', files.length, 'files');
+      
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff'];
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`Unsupported file type: ${file.type}`);
+        }
 
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `properties/${fileName}`;
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `properties/${fileName}`;
 
-      // Use upsert to handle existing files
-      const { error: uploadError } = await supabase.storage
-        .from('property-images')
-        .upload(filePath, file, {
-          upsert: true,
-          cacheControl: '3600',
-        });
+        console.log('Uploading file:', fileName, 'to path:', filePath);
 
-      if (uploadError) throw uploadError;
+        // Use upsert to handle existing files
+        const { error: uploadError } = await supabase.storage
+          .from('property-images')
+          .upload(filePath, file, {
+            upsert: true,
+            cacheControl: '3600',
+          });
 
-      const { data } = supabase.storage
-        .from('property-images')
-        .getPublicUrl(filePath);
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
 
-      return data.publicUrl;
-    });
+        const { data } = supabase.storage
+          .from('property-images')
+          .getPublicUrl(filePath);
 
-    return Promise.all(uploadPromises);
+        console.log('Upload successful, public URL:', data.publicUrl);
+        return data.publicUrl;
+      });
+
+      const results = await Promise.all(uploadPromises);
+      console.log('All uploads completed:', results);
+      return results;
+    } catch (error) {
+      console.error('Error in uploadImages:', error);
+      throw error;
+    }
   };
 
   const deleteImages = async (imageUrls: string[]) => {
