@@ -97,13 +97,23 @@ export const usePropertyManagement = () => {
 
   const uploadImages = async (files: FileList): Promise<string[]> => {
     const uploadPromises = Array.from(files).map(async (file) => {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(`Unsupported file type: ${file.type}`);
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `properties/${fileName}`;
 
+      // Use upsert to handle existing files
       const { error: uploadError } = await supabase.storage
         .from('property-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: '3600',
+        });
 
       if (uploadError) throw uploadError;
 
@@ -119,13 +129,26 @@ export const usePropertyManagement = () => {
 
   const deleteImages = async (imageUrls: string[]) => {
     const deletePromises = imageUrls.map(async (url) => {
-      const path = url.split('/').pop();
-      if (path) {
-        const { error } = await supabase.storage
-          .from('property-images')
-          .remove([`properties/${path}`]);
+      try {
+        // Extract the full path from the public URL
+        const urlParts = url.split('/');
+        const storageIndex = urlParts.findIndex(part => part === 'property-images');
         
-        if (error) console.error('Error deleting image:', error);
+        if (storageIndex !== -1 && storageIndex < urlParts.length - 1) {
+          // Get everything after 'property-images' bucket name
+          const filePath = urlParts.slice(storageIndex + 1).join('/');
+          
+          const { error } = await supabase.storage
+            .from('property-images')
+            .remove([filePath]);
+          
+          if (error) {
+            console.error('Error deleting image:', error);
+            throw error;
+          }
+        }
+      } catch (error) {
+        console.error('Error processing image URL for deletion:', url, error);
       }
     });
 

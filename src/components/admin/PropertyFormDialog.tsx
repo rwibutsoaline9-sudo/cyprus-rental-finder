@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { Property } from '@/types/property';
 import { ImageUpload } from './ImageUpload';
+import { AmenitiesSelector } from './AmenitiesSelector';
 
 interface PropertyFormDialogProps {
   open: boolean;
@@ -85,8 +86,7 @@ export const PropertyFormDialog = ({ open, onOpenChange, property, onSuccess }: 
     }
   };
 
-  const handleAmenitiesChange = (value: string) => {
-    const amenities = value.split(',').map(item => item.trim()).filter(Boolean);
+  const handleAmenitiesChange = (amenities: string[]) => {
     setFormData(prev => ({ ...prev, amenities }));
   };
 
@@ -216,15 +216,10 @@ export const PropertyFormDialog = ({ open, onOpenChange, property, onSuccess }: 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amenities">Amenities (comma-separated)</Label>
-            <Input
-              id="amenities"
-              value={formData.amenities.join(', ')}
-              onChange={(e) => handleAmenitiesChange(e.target.value)}
-              placeholder="WiFi, Parking, Pool, Gym"
-            />
-          </div>
+          <AmenitiesSelector
+            value={formData.amenities}
+            onChange={handleAmenitiesChange}
+          />
 
           <ImageUpload
             images={formData.images}
