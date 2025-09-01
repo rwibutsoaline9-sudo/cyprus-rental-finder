@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { Property } from '@/types/property';
+import { ImageUpload } from './ImageUpload';
 
 interface PropertyFormDialogProps {
   open: boolean;
@@ -89,8 +90,7 @@ export const PropertyFormDialog = ({ open, onOpenChange, property, onSuccess }: 
     setFormData(prev => ({ ...prev, amenities }));
   };
 
-  const handleImagesChange = (value: string) => {
-    const images = value.split(',').map(item => item.trim()).filter(Boolean);
+  const handleImagesChange = (images: string[]) => {
     setFormData(prev => ({ ...prev, images }));
   };
 
@@ -226,16 +226,11 @@ export const PropertyFormDialog = ({ open, onOpenChange, property, onSuccess }: 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="images">Image URLs (comma-separated)</Label>
-            <Textarea
-              id="images"
-              value={formData.images.join(', ')}
-              onChange={(e) => handleImagesChange(e.target.value)}
-              placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-              rows={2}
-            />
-          </div>
+          <ImageUpload
+            images={formData.images}
+            onImagesChange={handleImagesChange}
+            disabled={loading}
+          />
 
           <div className="flex items-center space-x-2">
             <Checkbox

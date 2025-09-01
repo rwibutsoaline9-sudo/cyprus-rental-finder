@@ -95,10 +95,49 @@ export const usePropertyManagement = () => {
     }
   };
 
+  const uploadImages = async (files: FileList): Promise<string[]> => {
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `properties/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('property-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('property-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
+  const deleteImages = async (imageUrls: string[]) => {
+    const deletePromises = imageUrls.map(async (url) => {
+      const path = url.split('/').pop();
+      if (path) {
+        const { error } = await supabase.storage
+          .from('property-images')
+          .remove([`properties/${path}`]);
+        
+        if (error) console.error('Error deleting image:', error);
+      }
+    });
+
+    await Promise.all(deletePromises);
+  };
+
   return {
     createProperty,
     updateProperty,
     deleteProperty,
+    uploadImages,
+    deleteImages,
     loading,
   };
 };

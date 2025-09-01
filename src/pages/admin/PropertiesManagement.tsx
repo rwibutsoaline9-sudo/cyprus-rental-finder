@@ -138,7 +138,12 @@ export const PropertiesManagement = () => {
               </div>
               
               <div className="flex gap-2 mt-4">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => window.open(`/property/${property.id}`, '_blank')}
+                >
                   <Eye className="h-4 w-4 mr-1" />
                   View
                 </Button>
