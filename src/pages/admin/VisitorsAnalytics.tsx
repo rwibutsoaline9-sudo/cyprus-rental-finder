@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAdmin } from '@/hooks/useAdmin';
-import { Users, Monitor, Smartphone, Globe } from 'lucide-react';
+import { Users, Monitor, Smartphone, Globe, Tablet, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Table,
@@ -41,14 +41,37 @@ export const VisitorsAnalytics = () => {
   
   const mobileVisitors = visitors.filter(v => v.device_type === 'mobile');
   const desktopVisitors = visitors.filter(v => v.device_type === 'desktop');
+  const tabletVisitors = visitors.filter(v => v.device_type === 'tablet');
   
   const uniquePages = new Set(visitors.map(v => v.page_url)).size;
+  const topCountries = visitors.reduce((acc, visitor) => {
+    if (visitor.country) {
+      acc[visitor.country] = (acc[visitor.country] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType) {
+      case 'mobile': return <Smartphone className="h-4 w-4" />;
+      case 'tablet': return <Tablet className="h-4 w-4" />;
+      default: return <Monitor className="h-4 w-4" />;
+    }
+  };
+
+  const getBrowserName = (userAgent: string) => {
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    return 'Other';
+  };
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Visitor Analytics</h1>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
@@ -77,7 +100,7 @@ export const VisitorsAnalytics = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mobile Visitors</CardTitle>
+            <CardTitle className="text-sm font-medium">Mobile</CardTitle>
             <Smartphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -90,7 +113,7 @@ export const VisitorsAnalytics = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Desktop Visitors</CardTitle>
+            <CardTitle className="text-sm font-medium">Desktop</CardTitle>
             <Monitor className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -100,7 +123,43 @@ export const VisitorsAnalytics = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tablet</CardTitle>
+            <Tablet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tabletVisitors.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {visitors.length > 0 ? Math.round((tabletVisitors.length / visitors.length) * 100) : 0}% of total
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Top Countries Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Top Countries
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Object.entries(topCountries)
+              .sort(([,a], [,b]) => b - a)
+              .slice(0, 8)
+              .map(([country, count]) => (
+                <div key={country} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <span className="font-medium">{country}</span>
+                  <span className="text-sm text-muted-foreground">{count} visitors</span>
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -112,6 +171,8 @@ export const VisitorsAnalytics = () => {
               <TableRow>
                 <TableHead>Page</TableHead>
                 <TableHead>Device</TableHead>
+                <TableHead>Browser</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead>Referrer</TableHead>
                 <TableHead>Time</TableHead>
               </TableRow>
@@ -123,7 +184,24 @@ export const VisitorsAnalytics = () => {
                     {visitor.page_url.split('/').pop() || 'Home'}
                   </TableCell>
                   <TableCell>
-                    <span className="capitalize">{visitor.device_type}</span>
+                    <div className="flex items-center gap-2">
+                      {getDeviceIcon(visitor.device_type || 'desktop')}
+                      <span className="capitalize">{visitor.device_type || 'desktop'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{getBrowserName(visitor.user_agent || '')}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {visitor.city && visitor.country ? (
+                        <span>{visitor.city}, {visitor.country}</span>
+                      ) : visitor.country ? (
+                        <span>{visitor.country}</span>
+                      ) : (
+                        <span className="text-muted-foreground">Unknown</span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {visitor.referrer ? (

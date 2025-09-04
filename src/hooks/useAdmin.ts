@@ -7,6 +7,10 @@ export interface VisitorAnalytics {
   page_url: string;
   referrer?: string;
   device_type?: string;
+  user_agent?: string;
+  city?: string;
+  country?: string;
+  ip_address?: unknown;
   created_at: string;
 }
 
