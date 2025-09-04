@@ -105,7 +105,7 @@ export const PropertyCard = ({ property, onBookNow }: PropertyCardProps) => {
                 <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
                   <DialogTrigger asChild>
                     <div 
-                      className="relative aspect-[4/3] overflow-hidden rounded-t-xl cursor-pointer group/image"
+                      className="relative aspect-[3/2] overflow-hidden rounded-t-xl cursor-pointer group/image"
                       onClick={() => {
                         setPreviewImageIndex(index);
                         setIsPreviewOpen(true);
