@@ -65,14 +65,14 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 md:py-6">
         {/* Top Banner Ad */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <AdSpace size="banner" />
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-4 sm:mb-6">
           <PropertyFilters
             filters={filters}
             onFiltersChange={handleFiltersChange}
@@ -81,12 +81,12 @@ const Index = () => {
         </div>
 
         {/* Main Content with Sidebar */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-6">
           {/* Main Content */}
           <div className="flex-1">
             {/* Results Summary */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
                 <MapPin className="h-4 w-4" />
                 <span>
                   {loading ? 'Searching...' : `${properties.length} properties found`}
@@ -98,22 +98,22 @@ const Index = () => {
 
             {/* Property Listings */}
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Loading properties...</span>
+              <div className="flex items-center justify-center py-8 sm:py-12">
+                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground text-sm sm:text-base">Loading properties...</span>
               </div>
             ) : properties.length === 0 ? (
               <Card>
-                <CardContent className="text-center py-12">
-                  <Home className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No properties found</h3>
-                  <p className="text-muted-foreground mb-4">
+                <CardContent className="text-center py-8 sm:py-12">
+                  <Home className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">No properties found</h3>
+                  <p className="text-muted-foreground mb-4 text-sm sm:text-base">
                     Try adjusting your search filters to find more properties.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
                 {properties.map((property) => (
                   <PropertyCard
                     key={property.id}
@@ -126,7 +126,7 @@ const Index = () => {
           </div>
 
           {/* Right Sidebar - Ads */}
-          <div className="lg:w-80 space-y-6">
+          <div className="xl:w-64 2xl:w-72 space-y-3 sm:space-y-4">
             <AdSpace size="sidebar" />
             <AdSpace size="rectangle" />
           </div>

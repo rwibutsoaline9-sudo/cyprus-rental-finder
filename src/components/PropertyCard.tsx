@@ -103,14 +103,14 @@ export const PropertyCard = ({ property, onBookNow }: PropertyCardProps) => {
             {images.map((image, index) => (
               <CarouselItem key={index}>
                 <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                  <DialogTrigger asChild>
-                    <div 
-                      className="relative aspect-[3/2] overflow-hidden rounded-t-xl cursor-pointer group/image"
-                      onClick={() => {
-                        setPreviewImageIndex(index);
-                        setIsPreviewOpen(true);
-                      }}
-                    >
+                   <DialogTrigger asChild>
+                     <div 
+                       className="relative aspect-[4/3] overflow-hidden rounded-t-xl cursor-pointer group/image"
+                       onClick={() => {
+                         setPreviewImageIndex(index);
+                         setIsPreviewOpen(true);
+                       }}
+                     >
                       <img 
                         src={image} 
                         alt={`${property.title} - Image ${index + 1}`}
@@ -225,82 +225,82 @@ export const PropertyCard = ({ property, onBookNow }: PropertyCardProps) => {
         </Badge>
       </div>
       
-      <CardContent className="p-4 space-y-3">
+      <CardContent className="p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3">
         {/* Location and rating */}
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            <span className="font-medium text-foreground">{property.area}, {property.city}</span>
+          <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+            <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+            <span className="font-medium text-foreground truncate">{property.area}, {property.city}</span>
           </div>
-          <div className="flex items-center gap-1 text-sm">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+          <div className="flex items-center gap-1 text-xs sm:text-sm flex-shrink-0">
+            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-yellow-400 text-yellow-400" />
             <span className="font-medium">4.8</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="font-medium text-base line-clamp-1 text-foreground group-hover:text-primary transition-colors">
+        <h3 className="font-medium text-sm sm:text-base line-clamp-2 text-foreground group-hover:text-primary transition-colors leading-tight">
           {property.title}
         </h3>
 
         {/* Property details */}
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
           {property.bedrooms > 0 && (
             <div className="flex items-center gap-1">
-              <Bed className="h-3 w-3" />
-              <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>
+              <Bed className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+              <span>{property.bedrooms}</span>
             </div>
           )}
           <div className="flex items-center gap-1">
-            <Bath className="h-3 w-3" />
-            <span>{property.bathrooms} bath{property.bathrooms > 1 ? 's' : ''}</span>
+            <Bath className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+            <span>{property.bathrooms}</span>
           </div>
           {property.furnished && (
-            <Badge variant="outline" className="text-xs py-0">
+            <Badge variant="outline" className="text-xs py-0 px-1 hidden sm:inline-flex">
               Furnished
             </Badge>
           )}
         </div>
 
-        {/* Amenities preview */}
+        {/* Amenities preview - only show on larger screens */}
         {property.amenities && property.amenities.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {property.amenities.slice(0, 3).map((amenity, index) => (
-              <span key={index} className="flex items-center gap-1">
-                {amenity.toLowerCase().includes('wifi') && <Wifi className="h-3 w-3" />}
-                {amenity.toLowerCase().includes('parking') && <Car className="h-3 w-3" />}
-                {amenity}
+          <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground">
+            {property.amenities.slice(0, 2).map((amenity, index) => (
+              <span key={index} className="flex items-center gap-1 truncate">
+                {amenity.toLowerCase().includes('wifi') && <Wifi className="h-2.5 w-2.5" />}
+                {amenity.toLowerCase().includes('parking') && <Car className="h-2.5 w-2.5" />}
+                <span className="truncate">{amenity}</span>
               </span>
             ))}
-            {property.amenities.length > 3 && (
-              <span>+{property.amenities.length - 3} more</span>
+            {property.amenities.length > 2 && (
+              <span>+{property.amenities.length - 2}</span>
             )}
           </div>
         )}
 
         {/* Price */}
-        <div className="flex items-baseline justify-between pt-2">
+        <div className="flex items-baseline justify-between pt-1 sm:pt-2">
           <div className="flex items-baseline gap-1">
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-sm sm:text-lg font-semibold text-foreground">
               {formatPrice(property.price, property.rental_period)}
             </span>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
               / {getPeriodLabel(property.rental_period)}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            {property.rental_period === 'short-term' ? 'Short-term' : 'Long-term'}
+          <span className="text-xs text-muted-foreground hidden sm:inline">
+            {property.rental_period === 'short-term' ? 'Short' : 'Long'}
           </span>
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-2 sm:p-3 lg:p-4 pt-0">
         <Button 
           onClick={() => {
             trackPropertyView(property.id);
             onBookNow(property);
           }}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-11 transition-all duration-200 hover:shadow-md"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg h-8 sm:h-9 lg:h-11 transition-all duration-200 hover:shadow-md text-xs sm:text-sm lg:text-base"
         >
           Reserve
         </Button>
