@@ -13,6 +13,7 @@ import { PropertyViews } from "@/pages/admin/PropertyViews";
 import { RatingsManagement } from "@/pages/admin/RatingsManagement";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
 import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
+import Auth from "@/pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
