@@ -12,6 +12,7 @@ import { VisitorsAnalytics } from "@/pages/admin/VisitorsAnalytics";
 import { PropertyViews } from "@/pages/admin/PropertyViews";
 import { RatingsManagement } from "@/pages/admin/RatingsManagement";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
+import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="properties" element={<PropertiesManagement />} />
+            <Route path="advertisements" element={<AdvertisementManagement />} />
             <Route path="visitors" element={<VisitorsAnalytics />} />
             <Route path="views" element={<PropertyViews />} />
             <Route path="ratings" element={<RatingsManagement />} />

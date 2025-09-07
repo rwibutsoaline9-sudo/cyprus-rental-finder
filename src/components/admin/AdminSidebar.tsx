@@ -18,11 +18,13 @@ import {
   Users,
   Settings,
   Home,
+  Megaphone,
 } from 'lucide-react';
 
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: BarChart3, exact: true },
   { title: 'Properties', url: '/admin/properties', icon: Building2 },
+  { title: 'Advertisements', url: '/admin/advertisements', icon: Megaphone },
   { title: 'Visitors', url: '/admin/visitors', icon: Users },
   { title: 'Property Views', url: '/admin/views', icon: Eye },
   { title: 'Ratings', url: '/admin/ratings', icon: Star },
