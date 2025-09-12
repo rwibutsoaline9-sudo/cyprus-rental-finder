@@ -21,7 +21,20 @@ export const Header = ({ onSearch }: HeaderProps) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.(searchQuery);
+    if (searchQuery.trim()) {
+      onSearch?.(searchQuery.trim());
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    // Trigger search on input change for instant results
+    if (value.trim()) {
+      onSearch?.(value.trim());
+    } else {
+      onSearch?.(''); // Clear search when input is empty
+    }
   };
 
   return (
@@ -37,11 +50,11 @@ export const Header = ({ onSearch }: HeaderProps) => {
           <div className="hidden md:flex flex-1 max-w-2xl mx-8">
             <form onSubmit={handleSearch} className="w-full">
               <div className="flex items-center bg-white rounded overflow-hidden shadow-sm">
-                <Input
+                 <Input
                   type="text"
                   placeholder="Where are you going?"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleInputChange}
                   className="flex-1 border-none text-gray-700 placeholder-gray-500 focus:ring-0 h-12"
                 />
                 <Button 
@@ -111,11 +124,11 @@ export const Header = ({ onSearch }: HeaderProps) => {
         <div className="md:hidden pb-4">
           <form onSubmit={handleSearch}>
             <div className="flex items-center bg-white rounded overflow-hidden">
-              <Input
+               <Input
                 type="text"
                 placeholder="Where are you going?"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleInputChange}
                 className="flex-1 border-none text-gray-700 placeholder-gray-500 focus:ring-0"
               />
               <Button 
