@@ -18,8 +18,8 @@ export const useProperties = (filters: PropertyFilters = {}) => {
         .order('created_at', { ascending: false });
 
       // Apply filters
-      if (filters.city) {
-        query = query.eq('city', filters.city);
+      if (filters.city && filters.city.trim() !== '') {
+        query = query.ilike('city', `%${filters.city.trim()}%`);
       }
       if (filters.rental_period) {
         query = query.eq('rental_period', filters.rental_period);
