@@ -48,7 +48,7 @@ const Index = () => {
       <Header onSearch={handleHeaderSearch} />
       
       {/* Main content with top padding for fixed header */}
-      <div className="pt-32">
+      <div className="pt-20">
         <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 md:py-6">
         {/* Top Banner Ad */}
         <div className="mb-4 sm:mb-6">
