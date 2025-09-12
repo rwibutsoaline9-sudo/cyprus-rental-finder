@@ -47,12 +47,14 @@ export const useAdmin = () => {
     try {
       setLoading(true);
       
+      // Use direct queries since we have admin session
       const [visitorsRes, viewsRes, ratingsRes] = await Promise.all([
-        supabase
-          .from('visitor_analytics')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100),
+        fetch('https://cofrsijlcbilxsupbjxn.supabase.co/rest/v1/visitor_analytics?order=created_at.desc&limit=100', {
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvZnJzaWpsY2JpbHhzdXBianhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NTgzMjIsImV4cCI6MjA3MjIzNDMyMn0.pMBPUXp_QPU7bKwid0sNl8KWucluQXgUdodzEfGkqsw',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvZnJzaWpsY2JpbHhzdXBianhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NTgzMjIsImV4cCI6MjA3MjIzNDMyMn0.pMBPUXp_QPU7bKwid0sNl8KWucluQXgUdodzEfGkqsw'
+          }
+        }).then(res => res.json()),
         supabase
           .from('property_views')
           .select(`
@@ -70,7 +72,7 @@ export const useAdmin = () => {
           .order('created_at', { ascending: false })
       ]);
 
-      if (visitorsRes.data) setVisitors(visitorsRes.data);
+      setVisitors(visitorsRes || []);
       if (viewsRes.data) setPropertyViews(viewsRes.data as PropertyView[]);
       if (ratingsRes.data) setPropertyRatings(ratingsRes.data as PropertyRating[]);
     } catch (error) {

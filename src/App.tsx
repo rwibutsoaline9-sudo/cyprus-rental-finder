@@ -14,6 +14,7 @@ import { RatingsManagement } from "@/pages/admin/RatingsManagement";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
 import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
 import Auth from "@/pages/Auth";
+import AdminAuth from "@/pages/AdminAuth";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin/auth" element={<AdminAuth />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
