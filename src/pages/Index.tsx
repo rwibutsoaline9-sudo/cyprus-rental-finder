@@ -2,20 +2,17 @@ import { useState } from 'react';
 import { Property, PropertyFilters as PropertyFiltersType } from '@/types/property';
 import { useProperties } from '@/hooks/useProperties';
 import { useVisitorTracking } from '@/hooks/useVisitorTracking';
-import { useAuth } from '@/hooks/useAuth';
 import { PropertyCard } from '@/components/PropertyCard';
 import { PropertyFilters } from '@/components/PropertyFilters';
 import { BookingModal } from '@/components/BookingModal';
 import { Footer } from '@/components/Footer';
 import { AdSpace } from '@/components/AdSpace';
+import { Header } from '@/components/Header';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, Home, MapPin, Settings, LogOut, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Loader2, Home, MapPin } from 'lucide-react';
 
 const Index = () => {
   useVisitorTracking();
-  const { user, signOut, loading: authLoading } = useAuth();
   const [filters, setFilters] = useState<PropertyFiltersType>({});
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -40,57 +37,19 @@ const Index = () => {
     setSelectedProperty(null);
   };
 
+  const handleHeaderSearch = (query: string) => {
+    // Update filters based on search query
+    setFilters(prev => ({ ...prev, city: query }));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Home className="h-6 w-6 sm:h-8 sm:w-8" />
-              <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Cyprus Rental Finder</h1>
-                <p className="text-sm sm:text-base text-primary-foreground/80">Find your perfect rental property in Cyprus</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-4">
-              <Link 
-                to="/admin" 
-                className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-              >
-                <Settings className="h-4 w-4" />
-                Admin
-              </Link>
-              
-              {user ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-primary-foreground/80">
-                    <User className="h-4 w-4" />
-                    <span className="text-sm">{user.email}</span>
-                  </div>
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    onClick={signOut}
-                    className="flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <Link to="/auth">
-                  <Button variant="secondary" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 md:py-6">
+      <Header onSearch={handleHeaderSearch} />
+      
+      {/* Main content with top padding for fixed header */}
+      <div className="pt-32">
+        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 md:py-6">
         {/* Top Banner Ad */}
         <div className="mb-4 sm:mb-6">
           <AdSpace size="banner" />
@@ -167,6 +126,7 @@ const Index = () => {
         isOpen={isBookingModalOpen}
         onClose={handleCloseBookingModal}
       />
+      </div>
     </div>
   );
 };
