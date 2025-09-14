@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useVisitorTracking = () => {
+export const useVisitorTracking = (trackKey?: string) => {
   useEffect(() => {
     const trackVisitor = async () => {
       try {
@@ -15,7 +15,7 @@ export const useVisitorTracking = () => {
         else if (isMobile) deviceType = 'mobile';
 
         // Get location from IP (using a simple geo API)
-        let locationData = {};
+        let locationData: any = {};
         try {
           const response = await fetch('https://ipapi.co/json/');
           if (response.ok) {
@@ -43,7 +43,7 @@ export const useVisitorTracking = () => {
     };
 
     trackVisitor();
-  }, []);
+  }, [trackKey]);
 };
 
 export const trackPropertyView = async (propertyId: string) => {

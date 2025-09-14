@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -15,37 +15,48 @@ import { AdminSettings } from "@/pages/admin/AdminSettings";
 import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin/auth" element={<AdminAuth />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="properties" element={<PropertiesManagement />} />
-            <Route path="advertisements" element={<AdvertisementManagement />} />
-            <Route path="visitors" element={<VisitorsAnalytics />} />
-            <Route path="views" element={<PropertyViews />} />
-            <Route path="ratings" element={<RatingsManagement />} />
-            <Route path="settings" element={<AdminSettings />} />
-          </Route>
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const RouteChangeTracker = () => {
+  const location = useLocation();
+  // Track a visit on every route change
+  useVisitorTracking(`${location.pathname}${location.search}`);
+  return null;
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <RouteChangeTracker />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin/auth" element={<AdminAuth />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="properties" element={<PropertiesManagement />} />
+              <Route path="advertisements" element={<AdvertisementManagement />} />
+              <Route path="visitors" element={<VisitorsAnalytics />} />
+              <Route path="views" element={<PropertyViews />} />
+              <Route path="ratings" element={<RatingsManagement />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
