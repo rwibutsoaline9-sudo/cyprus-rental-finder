@@ -67,6 +67,53 @@ export const VisitorsAnalytics = () => {
     return 'Other';
   };
 
+  const getPageName = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const path = urlObj.pathname;
+      
+      if (path === '/') return 'Home Page';
+      if (path === '/auth') return 'Login/Register';
+      if (path.startsWith('/admin/')) {
+        const adminPath = path.replace('/admin/', '');
+        switch (adminPath) {
+          case '': return 'Admin Dashboard';
+          case 'visitors': return 'Visitor Analytics';
+          case 'properties': return 'Properties Management';
+          case 'advertisements': return 'Advertisement Management';
+          case 'views': return 'Property Views';
+          case 'ratings': return 'Ratings Management';
+          case 'settings': return 'Admin Settings';
+          default: return `Admin - ${adminPath}`;
+        }
+      }
+      
+      // Clean up the path for display
+      return path.split('/').filter(Boolean).map(segment => 
+        segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
+      ).join(' > ');
+    } catch {
+      return url.split('/').pop() || 'Unknown Page';
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const visitTime = new Date(dateString);
+    const diffInMinutes = Math.floor((now.getTime() - visitTime.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    return format(visitTime, 'MMM dd, yyyy');
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Visitor Analytics</h1>
@@ -164,29 +211,32 @@ export const VisitorsAnalytics = () => {
       <Card>
         <CardHeader>
           <CardTitle>Recent Visitors</CardTitle>
+          <p className="text-sm text-muted-foreground">Latest {Math.min(20, visitors.length)} visitors to your website</p>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Page</TableHead>
-                <TableHead>Device</TableHead>
-                <TableHead>Browser</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Referrer</TableHead>
-                <TableHead>Time</TableHead>
+                <TableHead className="w-[200px]">Page Visited</TableHead>
+                <TableHead className="w-[120px]">Device</TableHead>
+                <TableHead className="w-[100px]">Browser</TableHead>
+                <TableHead className="w-[150px]">Location</TableHead>
+                <TableHead className="w-[120px]">Source</TableHead>
+                <TableHead className="w-[100px]">When</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visitors.slice(0, 20).map((visitor) => (
                 <TableRow key={visitor.id}>
                   <TableCell className="font-medium">
-                    {visitor.page_url.split('/').pop() || 'Home'}
+                    <div className="max-w-[180px] truncate" title={visitor.page_url}>
+                      {getPageName(visitor.page_url)}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {getDeviceIcon(visitor.device_type || 'desktop')}
-                      <span className="capitalize">{visitor.device_type || 'desktop'}</span>
+                      <span className="capitalize text-sm">{visitor.device_type || 'Desktop'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -195,9 +245,12 @@ export const VisitorsAnalytics = () => {
                   <TableCell>
                     <div className="text-sm">
                       {visitor.city && visitor.country ? (
-                        <span>{visitor.city}, {visitor.country}</span>
+                        <div>
+                          <div className="font-medium">{visitor.city}</div>
+                          <div className="text-xs text-muted-foreground">{visitor.country}</div>
+                        </div>
                       ) : visitor.country ? (
-                        <span>{visitor.country}</span>
+                        <span className="font-medium">{visitor.country}</span>
                       ) : (
                         <span className="text-muted-foreground">Unknown</span>
                       )}
@@ -205,18 +258,36 @@ export const VisitorsAnalytics = () => {
                   </TableCell>
                   <TableCell>
                     {visitor.referrer ? (
-                      <span className="text-sm text-muted-foreground">
-                        {new URL(visitor.referrer).hostname}
-                      </span>
+                      <div className="text-sm">
+                        <div className="font-medium text-blue-600">External</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[100px]" title={visitor.referrer}>
+                          {new URL(visitor.referrer).hostname}
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-sm text-muted-foreground">Direct</span>
+                      <div className="text-sm">
+                        <div className="font-medium text-green-600">Direct</div>
+                        <div className="text-xs text-muted-foreground">Type-in/Bookmark</div>
+                      </div>
                     )}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(visitor.created_at), 'MMM dd, HH:mm')}
+                    <div className="text-sm">
+                      <div className="font-medium">{formatTimeAgo(visitor.created_at)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(new Date(visitor.created_at), 'HH:mm')}
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
+              {visitors.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No visitors yet. Once people visit your website, they'll appear here.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
