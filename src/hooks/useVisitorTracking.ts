@@ -7,6 +7,19 @@ export const useVisitorTracking = (trackKey?: string) => {
       try {
         const pageUrl = window.location.href;
 
+        // Persistent anonymous visitor id for accurate unique counts
+        const VISITOR_KEY = 'visitor_id';
+        let visitorId = localStorage.getItem(VISITOR_KEY) || '';
+        if (!visitorId) {
+          try {
+            visitorId = crypto.randomUUID();
+          } catch {
+            // Fallback if crypto API is unavailable
+            visitorId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          }
+          localStorage.setItem(VISITOR_KEY, visitorId);
+        }
+
         // Dedup within 30s to prevent double inserts (e.g., React StrictMode or rapid route changes)
         const dedupKey = `visit:${pageUrl}`;
         const last = sessionStorage.getItem(dedupKey);
@@ -52,6 +65,7 @@ export const useVisitorTracking = (trackKey?: string) => {
           referrer: document.referrer || null,
           user_agent: userAgent,
           device_type: deviceType,
+          visitor_id: visitorId || null,
           ...locationData
         });
       } catch (error) {

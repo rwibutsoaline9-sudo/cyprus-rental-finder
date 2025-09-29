@@ -34,9 +34,20 @@ export const AdminDashboard = () => {
   const avgRating = propertyRatings.length > 0 
     ? propertyRatings.reduce((sum, rating) => sum + rating.rating, 0) / propertyRatings.length 
     : 0;
-  const todayVisitors = visitors.filter(v => 
-    format(new Date(v.created_at), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-  ).length;
+
+  // Unique visitors today (based on persistent visitor_id, fallback to ip+user_agent)
+  const todayKey = format(new Date(), 'yyyy-MM-dd');
+  const todayVisitors = (() => {
+    const seen = new Set<string>();
+    return visitors
+      .filter(v => format(new Date(v.created_at), 'yyyy-MM-dd') === todayKey)
+      .filter(v => {
+        const key = (v as any).visitor_id || `${String((v as any).ip_address ?? '')}|${v.user_agent ?? ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).length;
+  })();
 
   return (
     <div className="space-y-6">

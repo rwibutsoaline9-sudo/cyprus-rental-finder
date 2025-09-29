@@ -11,6 +11,7 @@ export interface VisitorAnalytics {
   city?: string;
   country?: string;
   ip_address?: unknown;
+  visitor_id?: string | null;
   created_at: string;
 }
 
