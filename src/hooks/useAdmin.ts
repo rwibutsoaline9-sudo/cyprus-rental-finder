@@ -73,7 +73,8 @@ export const useAdmin = () => {
           .order('created_at', { ascending: false })
       ]);
 
-      setVisitors(visitorsRes || []);
+      const cleanedVisitors = (visitorsRes || []).filter((v: any) => !(v.page_url || '').includes('/admin'));
+      setVisitors(cleanedVisitors);
       if (viewsRes.data) setPropertyViews(viewsRes.data as PropertyView[]);
       if (ratingsRes.data) setPropertyRatings(ratingsRes.data as PropertyRating[]);
     } catch (error) {

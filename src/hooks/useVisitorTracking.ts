@@ -5,6 +5,11 @@ export const useVisitorTracking = (trackKey?: string) => {
   useEffect(() => {
     const trackVisitor = async () => {
       try {
+        // Skip tracking on admin routes and local development hosts
+        const { hostname, pathname } = window.location;
+        if (pathname.startsWith('/admin') || hostname === 'localhost' || hostname === '127.0.0.1') {
+          return;
+        }
         const pageUrl = window.location.href;
 
         // Persistent anonymous visitor id for accurate unique counts
