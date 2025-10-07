@@ -64,7 +64,17 @@ export const useProperties = (filters: PropertyFilters = {}) => {
 
   useEffect(() => {
     fetchProperties();
-  }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.city,
+    filters.rental_period,
+    filters.property_type,
+    filters.min_price,
+    filters.max_price,
+    filters.min_bedrooms,
+    filters.max_bedrooms,
+    filters.furnished,
+  ]);
 
   return {
     properties,
