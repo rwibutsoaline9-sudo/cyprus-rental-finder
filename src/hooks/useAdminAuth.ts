@@ -18,12 +18,12 @@ export const useAdminAuth = () => {
     try {
       setLoading(true);
       
-      // Check if user exists in admin_users table
+      // Check if user exists in admin_users table first
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (adminError || !adminData) {
         toast({
@@ -34,17 +34,33 @@ export const useAdminAuth = () => {
         return false;
       }
 
-      // For demo purposes, we'll accept any password for the admin user
-      // In production, you should verify the password hash
-      setAdminUser(adminData);
-      localStorage.setItem('admin_user', JSON.stringify(adminData));
-      
-      toast({
-        title: "Welcome",
-        description: `Signed in as ${adminData.name}`,
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (authError) {
+        toast({
+          title: "Authentication Failed",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (authData.user) {
+        setAdminUser(adminData);
+        
+        toast({
+          title: "Welcome",
+          description: `Signed in as ${adminData.name}`,
+        });
+        
+        return true;
+      }
       
-      return true;
+      return false;
     } catch (error) {
       console.error('Admin sign in error:', error);
       toast({
@@ -58,25 +74,45 @@ export const useAdminAuth = () => {
     }
   };
 
-  const signOut = () => {
-    setAdminUser(null);
-    localStorage.removeItem('admin_user');
-    toast({
-      title: "Signed out",
-      description: "You have been signed out",
-    });
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setAdminUser(null);
+      toast({
+        title: "Signed out",
+        description: "You have been signed out",
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   const checkAdminStatus = async () => {
     try {
-      const stored = localStorage.getItem('admin_user');
-      if (stored) {
-        const adminData = JSON.parse(stored);
-        setAdminUser(adminData);
+      setLoading(true);
+      
+      // Check if user is authenticated with Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user && user.email) {
+        // Check if the authenticated user is an admin
+        const { data: adminData, error } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', user.email)
+          .maybeSingle();
+
+        if (!error && adminData) {
+          setAdminUser(adminData);
+        } else {
+          // User is authenticated but not an admin, sign them out
+          await supabase.auth.signOut();
+          setAdminUser(null);
+        }
       }
     } catch (error) {
       console.error('Error checking admin status:', error);
-      localStorage.removeItem('admin_user');
+      setAdminUser(null);
     } finally {
       setLoading(false);
     }
@@ -84,6 +120,28 @@ export const useAdminAuth = () => {
 
   useEffect(() => {
     checkAdminStatus();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setAdminUser(null);
+      } else if (event === 'SIGNED_IN' && session?.user?.email) {
+        // Verify admin status when signed in
+        const { data: adminData } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', session.user.email)
+          .maybeSingle();
+
+        if (adminData) {
+          setAdminUser(adminData);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return {
