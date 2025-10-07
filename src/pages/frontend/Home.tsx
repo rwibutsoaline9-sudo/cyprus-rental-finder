@@ -1,16 +1,28 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useVisitorTracking } from '@/hooks/useVisitorTracking';
+import { useProperties } from '@/hooks/useProperties';
+import { Property } from '@/types/property';
 import { Header } from '@/components/frontend/Header';
 import { AdSpace } from '@/components/frontend/AdSpace';
 import { Footer } from '@/components/frontend/Footer';
+import { PropertyCard } from '@/components/frontend/PropertyCard';
+import { BookingModal } from '@/components/frontend/BookingModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home as HomeIcon, Building2, Hotel, Castle, Search } from 'lucide-react';
+import { Home as HomeIcon, Building2, Hotel, Castle, Search, ChevronRight } from 'lucide-react';
 
 const Home = () => {
   useVisitorTracking();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const { properties, loading } = useProperties();
+
+  // Group properties by type
+  const villas = properties.filter(p => p.property_type === 'villa');
+  const apartments = properties.filter(p => p.property_type === 'apartment');
+  const studios = properties.filter(p => p.property_type === 'studio');
+  const houses = properties.filter(p => p.property_type === 'house');
 
   const propertyCategories = [
     {
@@ -99,22 +111,115 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Featured Locations */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-6">Popular Locations</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {['Paphos', 'Limassol', 'Nicosia', 'Larnaca', 'Ayia Napa'].map((city) => (
-                <Link key={city} to={`/properties?city=${encodeURIComponent(city)}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardContent className="p-4 text-center">
-                      <h3 className="font-semibold">{city}</h3>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+          {/* Featured Properties Sections */}
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading properties...</p>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Premium Villas */}
+              {villas.length > 0 && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold">Premium Villas to Rent</h2>
+                    <Link to="/properties/villas">
+                      <Button variant="ghost" className="gap-2">
+                        View All <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                      {villas.slice(0, 6).map((property) => (
+                        <div key={property.id} className="flex-none w-[300px] snap-start">
+                          <PropertyCard property={property} onBookNow={setSelectedProperty} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Premium Apartments */}
+              {apartments.length > 0 && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold">Premium Apartments to Rent</h2>
+                    <Link to="/properties/apartments">
+                      <Button variant="ghost" className="gap-2">
+                        View All <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                      {apartments.slice(0, 6).map((property) => (
+                        <div key={property.id} className="flex-none w-[300px] snap-start">
+                          <PropertyCard property={property} onBookNow={setSelectedProperty} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Houses and Studios */}
+              {(houses.length > 0 || studios.length > 0) && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold">Houses and Studios for Rent</h2>
+                    <Link to="/properties">
+                      <Button variant="ghost" className="gap-2">
+                        View All <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                      {[...houses, ...studios].slice(0, 6).map((property) => (
+                        <div key={property.id} className="flex-none w-[300px] snap-start">
+                          <PropertyCard property={property} onBookNow={setSelectedProperty} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* All Recommended */}
+              {properties.length > 0 && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold">Recommended</h2>
+                    <Link to="/properties">
+                      <Button variant="ghost" className="gap-2">
+                        View All <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                      {properties.slice(0, 6).map((property) => (
+                        <div key={property.id} className="flex-none w-[300px] snap-start">
+                          <PropertyCard property={property} onBookNow={setSelectedProperty} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
+
+        {/* Booking Modal */}
+        <BookingModal
+          property={selectedProperty}
+          isOpen={!!selectedProperty}
+          onClose={() => setSelectedProperty(null)}
+        />
+
 
         <Footer />
       </div>
