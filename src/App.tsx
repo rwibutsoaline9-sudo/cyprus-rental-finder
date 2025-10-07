@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
@@ -17,11 +16,18 @@ import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
+// Frontend Pages
+import Home from "@/pages/frontend/Home";
+import Properties from "@/pages/frontend/Properties";
+import Villas from "@/pages/frontend/Villas";
+import Apartments from "@/pages/frontend/Apartments";
+import Studios from "@/pages/frontend/Studios";
+import Houses from "@/pages/frontend/Houses";
+
 const queryClient = new QueryClient();
 
 const RouteChangeTracker = () => {
   const location = useLocation();
-  // Track a visit on every route change
   useVisitorTracking(`${location.pathname}${location.search}`);
   return null;
 };
@@ -35,7 +41,15 @@ const App = () => {
         <BrowserRouter>
           <RouteChangeTracker />
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* Frontend Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/properties" element={<Properties />} />
+            <Route path="/properties/villas" element={<Villas />} />
+            <Route path="/properties/apartments" element={<Apartments />} />
+            <Route path="/properties/studios" element={<Studios />} />
+            <Route path="/properties/houses" element={<Houses />} />
+            
+            {/* Auth Routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin/auth" element={<AdminAuth />} />
             
@@ -50,7 +64,7 @@ const App = () => {
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

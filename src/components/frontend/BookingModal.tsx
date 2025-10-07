@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CalendarDays, CreditCard, MapPin, Home, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CryptoPaymentOption } from '@/components/CryptoPaymentOption';
+import { CryptoPaymentOption } from '@/components/frontend/CryptoPaymentOption';
 
 interface BookingModalProps {
   property: Property | null;
