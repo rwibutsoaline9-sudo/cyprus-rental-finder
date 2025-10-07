@@ -62,7 +62,10 @@ export const useVisitorTracking = (trackKey?: string) => {
             };
           }
         } catch (locationError) {
-          console.warn('Could not get location data:', locationError);
+          // Silently handle timeout/abort errors as they're expected
+          if (locationError instanceof Error && locationError.name !== 'AbortError') {
+            console.warn('Could not get location data:', locationError);
+          }
         }
 
         await supabase.from('visitor_analytics').insert({
