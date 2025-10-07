@@ -8,12 +8,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 import { Property } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarDays, CreditCard, MapPin, Home, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { CryptoPaymentOption } from '@/components/CryptoPaymentOption';
 
 interface BookingModalProps {
   property: Property | null;
@@ -29,6 +31,8 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
   const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [notes, setNotes] = useState('');
   const [paymentPercentage, setPaymentPercentage] = useState('50');
+  const [paymentMethod, setPaymentMethod] = useState<'standard' | 'crypto'>('standard');
+  const [cryptoWalletAddress, setCryptoWalletAddress] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -232,39 +236,68 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
                 </div>
               </div>
 
-              {/* Payment Options */}
+              {/* Payment Method Selection */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Payment options</h3>
-                <RadioGroup value={paymentPercentage} onValueChange={setPaymentPercentage} className="space-y-3">
+                <h3 className="text-lg font-semibold">Payment method</h3>
+                <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as 'standard' | 'crypto')} className="space-y-3">
                   <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
-                    <RadioGroupItem value="50" id="payment-50" />
-                    <Label htmlFor="payment-50" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Pay 50% now</div>
-                      <div className="text-sm text-muted-foreground">
-                        Pay €{(property.price * 0.5).toFixed(0)} now, €{(property.price * 0.5).toFixed(0)} after check-in
-                      </div>
+                    <RadioGroupItem value="standard" id="payment-standard" />
+                    <Label htmlFor="payment-standard" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Standard Payment</div>
+                      <div className="text-sm text-muted-foreground">Credit card or bank transfer</div>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
-                    <RadioGroupItem value="75" id="payment-75" />
-                    <Label htmlFor="payment-75" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Pay 75% now</div>
-                      <div className="text-sm text-muted-foreground">
-                        Pay €{(property.price * 0.75).toFixed(0)} now, €{(property.price * 0.25).toFixed(0)} after check-in
-                      </div>
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
-                    <RadioGroupItem value="100" id="payment-100" />
-                    <Label htmlFor="payment-100" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Pay 100% now</div>
-                      <div className="text-sm text-muted-foreground">
-                        Pay full amount €{property.price.toFixed(0)} now
-                      </div>
+                    <RadioGroupItem value="crypto" id="payment-crypto" />
+                    <Label htmlFor="payment-crypto" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Cryptocurrency</div>
+                      <div className="text-sm text-muted-foreground">Bitcoin, USDT, BNB</div>
                     </Label>
                   </div>
                 </RadioGroup>
               </div>
+
+              {paymentMethod === 'standard' && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Payment options</h3>
+                  <RadioGroup value={paymentPercentage} onValueChange={setPaymentPercentage} className="space-y-3">
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                      <RadioGroupItem value="50" id="payment-50" />
+                      <Label htmlFor="payment-50" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Pay 50% now</div>
+                        <div className="text-sm text-muted-foreground">
+                          Pay €{(property.price * 0.5).toFixed(0)} now, €{(property.price * 0.5).toFixed(0)} after check-in
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                      <RadioGroupItem value="75" id="payment-75" />
+                      <Label htmlFor="payment-75" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Pay 75% now</div>
+                        <div className="text-sm text-muted-foreground">
+                          Pay €{(property.price * 0.75).toFixed(0)} now, €{(property.price * 0.25).toFixed(0)} after check-in
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
+                      <RadioGroupItem value="100" id="payment-100" />
+                      <Label htmlFor="payment-100" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Pay 100% now</div>
+                        <div className="text-sm text-muted-foreground">
+                          Pay full amount €{property.price.toFixed(0)} now
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
+
+              {paymentMethod === 'crypto' && (
+                <CryptoPaymentOption
+                  amount={paymentAmount}
+                  onPaymentMethodChange={(method, address) => setCryptoWalletAddress(address || '')}
+                />
+              )}
 
               {/* Additional Notes */}
               <div className="space-y-2">
@@ -289,11 +322,11 @@ export const BookingModal = ({ property, isOpen, onClose }: BookingModalProps) =
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (paymentMethod === 'crypto' && !cryptoWalletAddress)}
                   className="flex-1 bg-primary hover:bg-primary/90"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Processing...' : `Reserve & Pay €${paymentAmount.toFixed(0)}`}
+                  {isSubmitting ? 'Processing...' : paymentMethod === 'crypto' ? 'Confirm Crypto Payment' : `Reserve & Pay €${paymentAmount.toFixed(0)}`}
                 </Button>
               </div>
             </form>

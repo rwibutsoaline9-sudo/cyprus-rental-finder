@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { PaymentSettings } from '@/components/admin/PaymentSettings';
+import { CryptoPaymentSettings } from '@/components/admin/CryptoPaymentSettings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,8 +58,9 @@ export const AdminSettings = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="payments">
+          <TabsContent value="payments" className="space-y-6">
             <PaymentSettings />
+            <CryptoPaymentSettings />
           </TabsContent>
           
           <TabsContent value="general">

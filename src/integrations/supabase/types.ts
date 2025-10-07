@@ -139,6 +139,36 @@ export type Database = {
           },
         ]
       }
+      crypto_payment_settings: {
+        Row: {
+          created_at: string
+          currency_code: string
+          currency_name: string
+          id: string
+          is_enabled: boolean
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code: string
+          currency_name: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          currency_name?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           amenities: string[] | null
