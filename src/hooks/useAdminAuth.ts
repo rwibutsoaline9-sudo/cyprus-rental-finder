@@ -34,33 +34,58 @@ export const useAdminAuth = () => {
         return false;
       }
 
-      // Sign in with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      // Try to sign in with Supabase Auth
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      // If auth fails, try to sign up the admin user automatically (for demo purposes)
       if (authError) {
-        toast({
-          title: "Authentication Failed",
-          description: authError.message,
-          variant: "destructive",
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`,
+            data: {
+              name: adminData.name,
+              role: adminData.role
+            }
+          }
         });
-        return false;
+
+        if (signUpError) {
+          toast({
+            title: "Authentication Failed",
+            description: signUpError.message,
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        // Auto-confirm for demo purposes - sign in again
+        const { error: secondSignInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (secondSignInError) {
+          toast({
+            title: "Setup Required",
+            description: "Please check your email to confirm your account",
+          });
+          return false;
+        }
       }
 
-      if (authData.user) {
-        setAdminUser(adminData);
-        
-        toast({
-          title: "Welcome",
-          description: `Signed in as ${adminData.name}`,
-        });
-        
-        return true;
-      }
+      setAdminUser(adminData);
       
-      return false;
+      toast({
+        title: "Welcome",
+        description: `Signed in as ${adminData.name}`,
+      });
+      
+      return true;
     } catch (error) {
       console.error('Admin sign in error:', error);
       toast({
