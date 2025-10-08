@@ -11,7 +11,7 @@ interface AdminUser {
 
 export const useAdminAuth = () => {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const signInAsAdmin = async (email: string, password: string) => {
@@ -114,23 +114,19 @@ export const useAdminAuth = () => {
 
   const checkAdminStatus = async () => {
     try {
-      setLoading(true);
-      
-      // Check for active session first
+      // Non-blocking: don't toggle global loading for this quick check
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user?.email) {
-        // Check if the authenticated user is an admin
-        const { data: adminData, error } = await supabase
+        const { data: adminData } = await supabase
           .from('admin_users')
           .select('*')
           .eq('email', session.user.email)
           .maybeSingle();
 
-        if (!error && adminData) {
+        if (adminData) {
           setAdminUser(adminData);
         } else {
-          // User is authenticated but not an admin, sign them out
           await supabase.auth.signOut();
           setAdminUser(null);
         }
@@ -140,8 +136,6 @@ export const useAdminAuth = () => {
     } catch (error) {
       console.error('Error checking admin status:', error);
       setAdminUser(null);
-    } finally {
-      setLoading(false);
     }
   };
 
