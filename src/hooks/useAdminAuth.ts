@@ -116,15 +116,15 @@ export const useAdminAuth = () => {
     try {
       setLoading(true);
       
-      // Check if user is authenticated with Supabase
-      const { data: { user } } = await supabase.auth.getUser();
+      // Check for active session first
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (user && user.email) {
+      if (session?.user?.email) {
         // Check if the authenticated user is an admin
         const { data: adminData, error } = await supabase
           .from('admin_users')
           .select('*')
-          .eq('email', user.email)
+          .eq('email', session.user.email)
           .maybeSingle();
 
         if (!error && adminData) {
@@ -134,6 +134,8 @@ export const useAdminAuth = () => {
           await supabase.auth.signOut();
           setAdminUser(null);
         }
+      } else {
+        setAdminUser(null);
       }
     } catch (error) {
       console.error('Error checking admin status:', error);
