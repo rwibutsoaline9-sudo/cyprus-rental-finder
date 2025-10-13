@@ -40,42 +40,13 @@ export const useAdminAuth = () => {
         password,
       });
 
-      // If auth fails, try to sign up the admin user automatically (for demo purposes)
       if (authError) {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
-            data: {
-              name: adminData.name,
-              role: adminData.role
-            }
-          }
+        toast({
+          title: "Authentication Failed",
+          description: "Invalid email or password.",
+          variant: "destructive",
         });
-
-        if (signUpError) {
-          toast({
-            title: "Authentication Failed",
-            description: signUpError.message,
-            variant: "destructive",
-          });
-          return false;
-        }
-
-        // Auto-confirm for demo purposes - sign in again
-        const { error: secondSignInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (secondSignInError) {
-          toast({
-            title: "Setup Required",
-            description: "Please check your email to confirm your account",
-          });
-          return false;
-        }
+        return false;
       }
 
       setAdminUser(adminData);
@@ -140,25 +111,31 @@ export const useAdminAuth = () => {
   };
 
   useEffect(() => {
-    checkAdminStatus();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth state changes FIRST (sync-only actions in callback)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setAdminUser(null);
-      } else if (event === 'SIGNED_IN' && session?.user?.email) {
-        // Verify admin status when signed in
-        const { data: adminData } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('email', session.user.email)
-          .maybeSingle();
-
-        if (adminData) {
-          setAdminUser(adminData);
-        }
+      }
+      if (event === 'SIGNED_IN' && session?.user?.email) {
+        // Defer any Supabase calls to avoid deadlocks
+        setTimeout(async () => {
+          const { data: adminData } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('email', session.user!.email!)
+            .maybeSingle();
+          if (adminData) {
+            setAdminUser(adminData);
+          } else {
+            await supabase.auth.signOut();
+            setAdminUser(null);
+          }
+        }, 0);
       }
     });
+
+    // THEN check for existing session
+    checkAdminStatus();
 
     return () => {
       subscription.unsubscribe();
