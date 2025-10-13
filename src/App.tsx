@@ -15,6 +15,7 @@ import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 
 // Frontend Pages
 import Home from "@/pages/frontend/Home";
@@ -38,36 +39,38 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <RouteChangeTracker />
-          <Routes>
-            {/* Frontend Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/properties/villas" element={<Villas />} />
-            <Route path="/properties/apartments" element={<Apartments />} />
-            <Route path="/properties/studios" element={<Studios />} />
-            <Route path="/properties/houses" element={<Houses />} />
-            
-            {/* Auth Routes */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/admin/auth" element={<AdminAuth />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="properties" element={<PropertiesManagement />} />
-              <Route path="advertisements" element={<AdvertisementManagement />} />
-              <Route path="visitors" element={<VisitorsAnalytics />} />
-              <Route path="views" element={<PropertyViews />} />
-              <Route path="ratings" element={<RatingsManagement />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AdminAuthProvider>
+          <BrowserRouter>
+            <RouteChangeTracker />
+            <Routes>
+              {/* Frontend Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/properties/villas" element={<Villas />} />
+              <Route path="/properties/apartments" element={<Apartments />} />
+              <Route path="/properties/studios" element={<Studios />} />
+              <Route path="/properties/houses" element={<Houses />} />
+              
+              {/* Auth Routes */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/admin/auth" element={<AdminAuth />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="properties" element={<PropertiesManagement />} />
+                <Route path="advertisements" element={<AdvertisementManagement />} />
+                <Route path="visitors" element={<VisitorsAnalytics />} />
+                <Route path="views" element={<PropertyViews />} />
+                <Route path="ratings" element={<RatingsManagement />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AdminAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
