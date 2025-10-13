@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useVisitorTracking } from '@/hooks/useVisitorTracking';
 import { useProperties } from '@/hooks/useProperties';
 import { Property } from '@/types/property';
@@ -14,6 +14,7 @@ import { Home as HomeIcon, Building2, Hotel, Castle, Search, ChevronRight } from
 
 const Home = () => {
   useVisitorTracking();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { properties, loading } = useProperties();
@@ -57,8 +58,8 @@ const Home = () => {
 
   const handleHeaderSearch = (query: string) => {
     setSearchQuery(query);
-    // Navigate to all properties with search query
-    window.location.href = `/properties?search=${encodeURIComponent(query)}`;
+    // SPA navigation to avoid full page reload
+    navigate(`/properties?search=${encodeURIComponent(query)}`);
   };
 
   return (

@@ -86,7 +86,7 @@ export const useAdminAuth = () => {
 
   const checkAdminStatus = async () => {
     try {
-      // Non-blocking: don't toggle global loading for this quick check
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user?.email) {
@@ -108,6 +108,8 @@ export const useAdminAuth = () => {
     } catch (error) {
       console.error('Error checking admin status:', error);
       setAdminUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,8 +118,10 @@ export const useAdminAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setAdminUser(null);
+        setLoading(false);
       }
       if (event === 'SIGNED_IN' && session?.user?.email) {
+        setLoading(true);
         // Defer any Supabase calls to avoid deadlocks
         setTimeout(async () => {
           const { data: adminData } = await supabase
@@ -131,6 +135,7 @@ export const useAdminAuth = () => {
             await supabase.auth.signOut();
             setAdminUser(null);
           }
+          setLoading(false);
         }, 0);
       }
     });
