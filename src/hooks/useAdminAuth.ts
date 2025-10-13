@@ -18,23 +18,7 @@ export const useAdminAuth = () => {
     try {
       setLoading(true);
       
-      // Check if user exists in admin_users table first
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (adminError || !adminData) {
-        toast({
-          title: "Access Denied",
-          description: "Invalid admin credentials",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      // Try to sign in with Supabase Auth
+      // Try to sign in with Supabase Auth FIRST
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -44,6 +28,23 @@ export const useAdminAuth = () => {
         toast({
           title: "Authentication Failed",
           description: "Invalid email or password.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Verify admin access after successful auth
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (adminError || !adminData) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "Your account does not have admin access.",
           variant: "destructive",
         });
         return false;
