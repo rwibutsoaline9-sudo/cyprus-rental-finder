@@ -20,6 +20,7 @@ interface AdFormData {
   image_url: string;
   link_url: string;
   ad_size: 'banner' | 'rectangle' | 'sidebar';
+  placement: string;
   is_active: boolean;
 }
 
@@ -36,6 +37,7 @@ export default function AdvertisementManagement() {
       image_url: '',
       link_url: '',
       ad_size: 'rectangle',
+      placement: 'all',
       is_active: false
     }
   });
@@ -48,6 +50,7 @@ export default function AdvertisementManagement() {
       setValue('image_url', ad.image_url || '');
       setValue('link_url', ad.link_url);
       setValue('ad_size', ad.ad_size);
+      setValue('placement', ad.placement);
       setValue('is_active', ad.is_active);
     } else {
       setEditingAd(null);
@@ -203,6 +206,27 @@ export default function AdvertisementManagement() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="placement">Placement *</Label>
+                <Select
+                  value={watch('placement')}
+                  onValueChange={(value) => setValue('placement', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select placement" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Pages</SelectItem>
+                    <SelectItem value="home">Home</SelectItem>
+                    <SelectItem value="properties">Properties</SelectItem>
+                    <SelectItem value="villas">Villas</SelectItem>
+                    <SelectItem value="apartments">Apartments</SelectItem>
+                    <SelectItem value="studios">Studios</SelectItem>
+                    <SelectItem value="houses">Houses</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="is_active"
@@ -252,6 +276,7 @@ export default function AdvertisementManagement() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Size</TableHead>
+                  <TableHead>Placement</TableHead>
                   <TableHead>Link</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -274,6 +299,11 @@ export default function AdvertisementManagement() {
                     <TableCell>
                       <Badge className={getSizeColor(ad.ad_size)}>
                         {ad.ad_size} ({getSizeDimensions(ad.ad_size)})
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {ad.placement}
                       </Badge>
                     </TableCell>
                     <TableCell>

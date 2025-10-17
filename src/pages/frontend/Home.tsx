@@ -114,7 +114,7 @@ const Home = () => {
 
           {/* Rectangle Ad */}
           <div className="mb-8">
-            <AdSpace size="rectangle" className="mx-auto max-w-md" />
+            <AdSpace size="rectangle" placement="home" className="mx-auto max-w-md" />
           </div>
 
           {/* Featured Properties Sections */}
@@ -126,7 +126,7 @@ const Home = () => {
             <>
               {/* Sidebar Ad - positioned on larger screens */}
               <div className="hidden lg:block fixed right-4 top-24 w-48 z-10">
-                <AdSpace size="sidebar" />
+                <AdSpace size="sidebar" placement="home" />
               </div>
               {/* Premium Villas */}
               {villas.length > 0 && (

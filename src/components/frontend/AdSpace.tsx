@@ -4,6 +4,7 @@ import { ExternalLink } from 'lucide-react';
 
 interface AdSpaceProps {
   size?: 'banner' | 'rectangle' | 'sidebar';
+  placement?: string;
   className?: string;
 }
 

@@ -9,6 +9,7 @@ export interface Advertisement {
   image_url?: string;
   link_url: string;
   ad_size: 'banner' | 'rectangle' | 'sidebar';
+  placement: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -140,8 +141,8 @@ export const useAdvertisements = () => {
   };
 };
 
-// Hook for getting active advertisements by size
-export const useActiveAdvertisements = (size?: 'banner' | 'rectangle' | 'sidebar') => {
+// Hook for getting active advertisements by size and placement
+export const useActiveAdvertisements = (size?: 'banner' | 'rectangle' | 'sidebar', placement?: string) => {
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -158,6 +159,10 @@ export const useActiveAdvertisements = (size?: 'banner' | 'rectangle' | 'sidebar
           query = query.eq('ad_size', size);
         }
 
+        if (placement) {
+          query = query.or(`placement.eq.${placement},placement.eq.all`);
+        }
+
         const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -170,7 +175,7 @@ export const useActiveAdvertisements = (size?: 'banner' | 'rectangle' | 'sidebar
     };
 
     fetchActiveAds();
-  }, [size]);
+  }, [size, placement]);
 
   return { advertisements, loading };
 };
