@@ -36,7 +36,7 @@ export default function AdvertisementManagement() {
       image_url: '',
       link_url: '',
       ad_size: 'rectangle',
-      is_active: true
+      is_active: false
     }
   });
 
