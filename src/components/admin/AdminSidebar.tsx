@@ -25,8 +25,9 @@ const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: BarChart3, exact: true },
   { title: 'Properties', url: '/admin/properties', icon: Building2 },
   { title: 'Advertisements', url: '/admin/advertisements', icon: Megaphone },
-  { title: 'Visitors', url: '/admin/visitors', icon: Users },
-  { title: 'Property Views', url: '/admin/views', icon: Eye },
+  { title: 'Users', url: '/admin/users', icon: Users },
+  { title: 'Visitors', url: '/admin/visitors', icon: Eye },
+  { title: 'Property Views', url: '/admin/views', icon: Star },
   { title: 'Ratings', url: '/admin/ratings', icon: Star },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];

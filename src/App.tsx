@@ -12,6 +12,7 @@ import { PropertyViews } from "@/pages/admin/PropertyViews";
 import { RatingsManagement } from "@/pages/admin/RatingsManagement";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
 import AdvertisementManagement from "@/pages/admin/AdvertisementManagement";
+import UsersManagement from "@/pages/admin/UsersManagement";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
@@ -63,6 +64,7 @@ const App = () => {
                 <Route path="visitors" element={<VisitorsAnalytics />} />
                 <Route path="views" element={<PropertyViews />} />
                 <Route path="ratings" element={<RatingsManagement />} />
+                <Route path="users" element={<UsersManagement />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               
