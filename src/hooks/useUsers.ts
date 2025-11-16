@@ -114,3 +114,47 @@ export const useDeleteUser = () => {
     }
   });
 };
+
+export const useBulkDeleteUsers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .in('id', userIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Users deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete users: ' + error.message);
+    }
+  });
+};
+
+export const useBulkAssignRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userIds, role }: { userIds: string[]; role: 'admin' | 'moderator' | 'user' }) => {
+      const inserts = userIds.map(userId => ({ user_id: userId, role }));
+      const { error } = await supabase
+        .from('user_roles')
+        .insert(inserts);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Roles assigned successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to assign roles: ' + error.message);
+    }
+  });
+};
