@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -9,12 +10,14 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
 }
 
 export const Header = ({ onSearch }: HeaderProps) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
@@ -69,6 +72,7 @@ export const Header = ({ onSearch }: HeaderProps) => {
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
+            <LanguageSwitcher />
             <Link to="/admin" className="text-white hover:text-gray-200 text-sm">
               List your property
             </Link>
